@@ -26,7 +26,7 @@ async def read(request):
 
 
 async def create(request):
-    query = "INSERT INTO services (ip, port, available) VALUES ({}, {}, {})"
+    query = "INSERT INTO services (ip, port, available) VALUES ('{}', {}, {})"
     data = await request.json()
     conn = await asyncpg.connect(user='postgres')
     await conn.execute(query.format(data['ip'], data['port'], data['available']))
