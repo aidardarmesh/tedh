@@ -14,7 +14,7 @@ async def read(request):
     resp = []
     conn = await asyncpg.connect(user='postgres')
     data = await conn.fetch(query)
-    conn.close()
+    await conn.close()
     for row in data:
         resp.append({
             'ip': row['ip'],
@@ -46,7 +46,7 @@ async def delete(request):
 
 async def init_db(app):
     conn = await asyncpg.connect(user='postgres')
-    conn.execute(
+    await conn.execute(
         '''
             CREATE TABLE IF NOT EXISTS services (
                 id serial NOT NULL,
@@ -57,7 +57,7 @@ async def init_db(app):
             )
             '''
     )
-    conn.close()
+    await conn.close()
 
 
 app = web.Application()
@@ -70,5 +70,5 @@ app.router.add_routes(
         web.get(r'/delete/{ip:[\w.]+}/{port:\d+}', delete)
     ]
 )
-# app.on_startup.extend([init_db])
+app.on_startup.extend([init_db])
 web.run_app(app, host='127.0.0.1', port=8080)
