@@ -36,11 +36,11 @@ async def create(request):
 
 
 async def delete(request):
-    query = f"DELETE * FROM services WHERE ip='{ip}'"
     ip = request.match_info.get('ip')
     port = request.match_info.get('port')
+    query = f"DELETE FROM services WHERE ip='{ip}'"
     if port:
-        query = f"DELETE * FROM services WHERE ip='{ip}' AND port={int(port)}"
+        query = f"DELETE FROM services WHERE ip='{ip}' AND port={int(port)}"
     conn = await asyncpg.connect(user='postgres')
     await conn.execute(query)
     await conn.close()
