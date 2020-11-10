@@ -19,11 +19,15 @@ web.run_app(app, host='127.0.0.1', port=8080)
 
 
 async def read(request):
+    query = f"SELECT * FROM services WHERE ip={ip}"
     ip = request.match_info.get('ip')
     port = request.match_info.get('port')
+    if port:
+        query = f"SELECT * FROM services WHERE ip={ip} AND port={int(port)}"
+    
     resp = []
     async with asyncpg.connect(user='postgres') as conn:
-        data = conn.fetch(f"SELECT * FROM services WHERE ip={ip}")
+        data = conn.fetch(query)
         for row in data:
             resp.append({
                 'ip': row['ip'],
