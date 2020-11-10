@@ -9,7 +9,7 @@ async def read(request):
     port = request.match_info.get('port')
     query = f"SELECT * FROM services WHERE ip={ip}"
     if port:
-        query = f"SELECT * FROM services WHERE ip={ip} AND port={int(port)}"
+        query = f"SELECT * FROM services WHERE ip='{ip}' AND port={int(port)}"
     
     resp = []
     conn = await asyncpg.connect(user='postgres')
