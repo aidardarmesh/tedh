@@ -12,14 +12,15 @@ async def read(request):
         query = f"SELECT * FROM services WHERE ip={ip} AND port={int(port)}"
     
     resp = []
-    async with asyncpg.connect(user='postgres') as conn:
-        data = conn.fetch(query)
-        for row in data:
-            resp.append({
-                'ip': row['ip'],
-                'port': row['port'],
-                'available': row['available']
-            })
+    conn = await asyncpg.connect(user='postgres')
+    data = await conn.fetch(query)
+    for row in data:
+        resp.append({
+            'ip': row['ip'],
+            'port': row['port'],
+            'available': row['available']
+        })
+    conn.close()
 
     return web.Response(body=json.dumps(resp), content_type='application/json')
 
