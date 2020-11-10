@@ -1,21 +1,7 @@
 from aiohttp import web
-from routes import setup_routes
 
 import json
 import asyncpg
-
-
-app = web.Application()
-app.router.add_routes(
-    [
-        web.get(r'/{ip:[\w.]+}', read),
-        web.get(r'/{ip:[\w.]+}/{port:\d+}', read),
-        web.post('/create', create),
-        web.get(r'/delete/{ip:[\w.]+}', delete),
-        web.get(r'/delete/{ip:[\w.]+}/{port:\d+}', delete)
-    ]
-)
-web.run_app(app, host='127.0.0.1', port=8080)
 
 
 async def read(request):
@@ -39,7 +25,12 @@ async def read(request):
 
 
 async def create(request):
-    pass
+    query = "INSERT INTO services (ip, port, available) VALUES ({}, {}, {})"
+    data = await request.json()
+    async with asyncpg.connect(user='postgres') as conn:
+        conn.execute(query.format(data['ip'], data['port'], data['available']))
+
+    return web.Response(body=json.dumps({'success': True}), content_type='application/json')
 
 
 async def delete(request):
@@ -50,3 +41,16 @@ async def delete(request):
         query = f"DELETE * FROM services WHERE ip={ip} AND port={int(port)}"
 
     return web.Response(body=json.dumps({'success': True}), content_type='application/json')
+
+
+app = web.Application()
+app.router.add_routes(
+    [
+        web.get(r'/{ip:[\w.]+}', read),
+        web.get(r'/{ip:[\w.]+}/{port:\d+}', read),
+        web.post('/create', create),
+        web.get(r'/delete/{ip:[\w.]+}', delete),
+        web.get(r'/delete/{ip:[\w.]+}/{port:\d+}', delete)
+    ]
+)
+web.run_app(app, host='127.0.0.1', port=8080)
