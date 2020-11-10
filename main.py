@@ -7,7 +7,7 @@ import asyncpg
 async def read(request):
     ip = request.match_info.get('ip')
     port = request.match_info.get('port')
-    query = f"SELECT * FROM services WHERE ip={ip}"
+    query = f"SELECT * FROM services WHERE ip='{ip}'"
     if port:
         query = f"SELECT * FROM services WHERE ip='{ip}' AND port={int(port)}"
     
@@ -28,18 +28,22 @@ async def read(request):
 async def create(request):
     query = "INSERT INTO services (ip, port, available) VALUES ({}, {}, {})"
     data = await request.json()
-    async with asyncpg.connect(user='postgres') as conn:
-        conn.execute(query.format(data['ip'], data['port'], data['available']))
+    conn = await asyncpg.connect(user='postgres')
+    await conn.execute(query.format(data['ip'], data['port'], data['available']))
+    await conn.close()
 
     return web.Response(body=json.dumps({'success': True}), content_type='application/json')
 
 
 async def delete(request):
-    query = f"DELETE * FROM services WHERE ip={ip}"
+    query = f"DELETE * FROM services WHERE ip='{ip}'"
     ip = request.match_info.get('ip')
     port = request.match_info.get('port')
     if port:
-        query = f"DELETE * FROM services WHERE ip={ip} AND port={int(port)}"
+        query = f"DELETE * FROM services WHERE ip='{ip}' AND port={int(port)}"
+    conn = await asyncpg.connect(user='postgres')
+    await conn.execute(query)
+    await conn.close()
 
     return web.Response(body=json.dumps({'success': True}), content_type='application/json')
 
