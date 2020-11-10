@@ -5,9 +5,9 @@ import asyncpg
 
 
 async def read(request):
-    query = f"SELECT * FROM services WHERE ip={ip}"
     ip = request.match_info.get('ip')
     port = request.match_info.get('port')
+    query = f"SELECT * FROM services WHERE ip={ip}"
     if port:
         query = f"SELECT * FROM services WHERE ip={ip} AND port={int(port)}"
     
@@ -68,5 +68,5 @@ app.router.add_routes(
         web.get(r'/delete/{ip:[\w.]+}/{port:\d+}', delete)
     ]
 )
-app.on_startup.extend([init_db])
+# app.on_startup.extend([init_db])
 web.run_app(app, host='127.0.0.1', port=8080)
