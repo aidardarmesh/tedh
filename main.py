@@ -43,6 +43,21 @@ async def delete(request):
     return web.Response(body=json.dumps({'success': True}), content_type='application/json')
 
 
+async def init_db(app):
+    async with asyncpg.connect(user='postgres') as conn:
+        conn.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS services (
+                id serial NOT NULL,
+                ip varchar NOT NULL,
+                port integer NOT NULL,
+                available boolean NOT NULL,
+                PRIMARY KEY (id)
+            )
+            '''
+        )
+
+
 app = web.Application()
 app.router.add_routes(
     [
@@ -53,4 +68,5 @@ app.router.add_routes(
         web.get(r'/delete/{ip:[\w.]+}/{port:\d+}', delete)
     ]
 )
+app.on_startup.extend([init_db])
 web.run_app(app, host='127.0.0.1', port=8080)
