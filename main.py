@@ -45,9 +45,9 @@ async def delete(request):
 
 
 async def init_db(app):
-    async with asyncpg.connect(user='postgres') as conn:
-        conn.execute(
-            '''
+    conn = await asyncpg.connect(user='postgres')
+    conn.execute(
+        '''
             CREATE TABLE IF NOT EXISTS services (
                 id serial NOT NULL,
                 ip varchar NOT NULL,
@@ -56,7 +56,8 @@ async def init_db(app):
                 PRIMARY KEY (id)
             )
             '''
-        )
+    )
+    conn.close()
 
 
 app = web.Application()
