@@ -14,13 +14,13 @@ async def read(request):
     resp = []
     conn = await asyncpg.connect(user='postgres')
     data = await conn.fetch(query)
+    conn.close()
     for row in data:
         resp.append({
             'ip': row['ip'],
             'port': row['port'],
             'available': row['available']
         })
-    conn.close()
 
     return web.Response(body=json.dumps(resp), content_type='application/json')
 
