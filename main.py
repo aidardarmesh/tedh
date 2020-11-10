@@ -43,5 +43,10 @@ async def create(request):
 
 
 async def delete(request):
-    pass
+    query = f"DELETE * FROM services WHERE ip={ip}"
+    ip = request.match_info.get('ip')
+    port = request.match_info.get('port')
+    if port:
+        query = f"DELETE * FROM services WHERE ip={ip} AND port={int(port)}"
 
+    return web.Response(body=json.dumps({'success': True}), content_type='application/json')
