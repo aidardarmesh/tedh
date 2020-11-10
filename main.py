@@ -4,11 +4,32 @@ import json
 import asyncpg
 
 
+def valid_ip(s):
+    a = s.split('.')
+    if len(a) != 4:
+        return False
+    for x in a:
+        if not x.isdigit():
+            return False
+        i = int(x)
+        if i < 0 or i > 255:
+            return False
+    return True
+
+
+def valid_port(p):
+    return 1024 <= int(p) <= 65535
+
+
 async def read(request):
     ip = request.match_info.get('ip')
+    if not valid_ip(ip):
+        raise Exception("Invalid IP")
     port = request.match_info.get('port')
     query = f"SELECT * FROM services WHERE ip='{ip}'"
     if port:
+        if not valid_port(port):
+            return Exception("Invalid port")
         query = f"SELECT * FROM services WHERE ip='{ip}' AND port={int(port)}"
     
     resp = []
