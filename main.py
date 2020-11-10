@@ -17,19 +17,29 @@ def valid_ip(s):
     return True
 
 
-def valid_port(p):
-    return 1024 <= int(p) <= 65535
+def check_ip(ip):
+    if not valid_ip(ip):
+        raise Exception("Invalid IP")
+    
+    return ip
+
+def valid_port(port):
+    return 1024 <= int(port) <= 65535
+
+
+def check_port(port):
+    if not valid_port(port):
+        raise Exception("Invalid port")
+
+    return port
 
 
 async def read(request):
-    ip = request.match_info.get('ip')
-    if not valid_ip(ip):
-        raise Exception("Invalid IP")
+    ip = check_ip(request.match_info.get('ip'))
     port = request.match_info.get('port')
     query = f"SELECT * FROM services WHERE ip='{ip}'"
     if port:
-        if not valid_port(port):
-            return Exception("Invalid port")
+        port = check_port(port)
         query = f"SELECT * FROM services WHERE ip='{ip}' AND port={int(port)}"
     
     resp = []
@@ -57,10 +67,11 @@ async def create(request):
 
 
 async def delete(request):
-    ip = request.match_info.get('ip')
+    ip = check_ip(request.match_info.get('ip'))
     port = request.match_info.get('port')
     query = f"DELETE FROM services WHERE ip='{ip}'"
     if port:
+        port = check_port(port)
         query = f"DELETE FROM services WHERE ip='{ip}' AND port={int(port)}"
     conn = await asyncpg.connect(user='postgres')
     await conn.execute(query)
